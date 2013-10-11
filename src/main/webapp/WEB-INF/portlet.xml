@@ -56,7 +56,6 @@
 		</supported-publishing-event>
 
 		<supported-public-render-parameter>searchterm</supported-public-render-parameter>
-		<!-- <supported-public-render-parameter>searchcategory</supported-public-render-parameter> -->
 		<supported-public-render-parameter>metadataAppCreated</supported-public-render-parameter>
 
 	</portlet>
@@ -85,16 +84,4 @@
 		<identifier>searchterm</identifier>
 		<qname xmlns:od="http://fokus.fraunhofer.de/odplatform">od:searchterm</qname>
 	</public-render-parameter>
-
-	<!-- <public-render-parameter> -->
-	<!-- <identifier>searchcategory</identifier> -->
-	<!-- <qname xmlns:od="http://fokus.fraunhofer.de/odplatform">od:searchcategory</qname> -->
-	<!-- </public-render-parameter> -->
-
-	<!-- <public-render-parameter> -->
-	<!-- <identifier>metadataAppCreated</identifier> -->
-	<!-- <qname xmlns:od="http://fokus.fraunhofer.de/odplatform">od:metadataAppCreated</qname> -->
-	<!-- </public-render-parameter> -->
-
-
 </portlet-app>

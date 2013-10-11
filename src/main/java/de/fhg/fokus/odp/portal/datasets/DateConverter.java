@@ -31,24 +31,23 @@ import javax.faces.convert.FacesConverter;
 @FacesConverter("dateConverter")
 public class DateConverter implements Converter {
 
-    private final String DATE_DE_PATTERN = "d.M.yyyy";
-    private SimpleDateFormat sdf = new SimpleDateFormat(DATE_DE_PATTERN);
+	private final SimpleDateFormat sdf = new SimpleDateFormat("d.M.yyyy");
 
-    @Override
-    public Object getAsObject(FacesContext arg0, UIComponent arg1, String arg2) {
-        Date date = null;
+	@Override
+	public Object getAsObject(FacesContext arg0, UIComponent arg1, String arg2) {
+		Date date = null;
 
-        try {
-            date = sdf.parse(arg2);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return date;
-    }
+		try {
+			date = sdf.parse(arg2);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return date;
+	}
 
-    @Override
-    public String getAsString(FacesContext arg0, UIComponent arg1, Object arg2) {
-        return sdf.format((Date) arg2);
-    }
+	@Override
+	public String getAsString(FacesContext arg0, UIComponent arg1, Object arg2) {
+		return sdf.format((Date) arg2);
+	}
 
 }

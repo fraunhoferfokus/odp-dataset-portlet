@@ -19,6 +19,7 @@
 
 package de.fhg.fokus.odp.portal.datasets;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import de.fhg.fokus.odp.registry.queries.QueryFacetItem;
@@ -26,24 +27,27 @@ import de.fhg.fokus.odp.registry.queries.QueryFacetItem;
 /**
  * The Class CategoriesTitleComparator.
  */
-public class FilterCountComparator implements Comparator<QueryFacetItem> {
+public class FilterCountComparator implements Comparator<QueryFacetItem>, Serializable {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-     */
-    @Override
-    public int compare(QueryFacetItem c1, QueryFacetItem c2) {
-        int result = 0;
+	/** The Constant serialVersionUID. */
+	private static final long serialVersionUID = 1L;
 
-        if (c1.getCount() < c2.getCount()) {
-            result = 1;
-        } else if (c1.getCount() > c2.getCount()) {
-            result = -1;
-        }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public int compare(QueryFacetItem c1, QueryFacetItem c2) {
+		int result = 0;
 
-        return result;
-    }
+		if (c1.getCount() < c2.getCount()) {
+			result = 1;
+		} else if (c1.getCount() > c2.getCount()) {
+			result = -1;
+		}
+
+		return result;
+	}
 
 }

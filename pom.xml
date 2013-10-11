@@ -101,11 +101,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.primefaces</groupId>
-			<artifactId>primefaces</artifactId>
-			<version>3.4</version>
-		</dependency>
-		<dependency>
 			<groupId>de.fhg.fokus.odp</groupId>
 			<artifactId>opendataregistry-client</artifactId>
 		</dependency>

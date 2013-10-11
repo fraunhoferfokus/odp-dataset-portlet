@@ -4,7 +4,6 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:p="http://primefaces.org/ui"
 	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
 
 	<h:head />
@@ -144,7 +143,7 @@
 							<h:commandButton id="myMetadata" action="#" styleClass="btn"
 								value="Meine Datensatzbeschreibungen"
 								rendered="#{currentUser.creator and currentQuery.query.types.size() > 0 and currentQuery.query.types.get(0) eq 'DATASET'}" />
-							<p:spacer width="10px" />
+<!-- 							<p:spacer width="10px" /> -->
 						</ui:remove>
 						<h:commandButton id="newMetadataData" styleClass="btn"
 							actionListener="#{currentUser.newMetadata}"
@@ -169,7 +168,7 @@
 
 					<h4 id="hitscount">
 						<h:outputText value="#{currentQuery.lastResult.count} #{i18n['od.dataset.results']}" />
-						<p:spacer width="2px" />
+<!-- 						<p:spacer width="2px" /> -->
 						<a href="#{currentQuery.rssUrl}" target="_blank" id="rsslink">
 							<h:graphicImage title="#{i18n['od.rss.subcribe']}"
 								value="#{liferay.themeImagesURL}/common/rss.png" width="16"
@@ -182,7 +181,7 @@
 						<div>#{i18n['od_datasets_search_empty_resultset_note']}</div>
 					</h:panelGroup>
 
-					<p:spacer height="30px" />
+<!-- 					<p:spacer height="30px" /> -->
 
 					<div style="display: block; margin-bottom: 10px;">
 						<div class="sortPane"
