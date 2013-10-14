@@ -11,7 +11,7 @@
 	<packaging>war</packaging>
 	<name>Dataset Portlet</name>
 	<scm>
-		<developerConnection>scm:git:git://gitlab.fokus.fraunhofer.de:odp-dataset-portlet</developerConnection>
+		<developerConnection>scm:git:git://github.com:fraunhoferfokus/odp-dataset-portlet.git</developerConnection>
 	</scm>
 	<build>
 		<finalName>${project.artifactId}-${project.version}-${buildNumber}</finalName>
