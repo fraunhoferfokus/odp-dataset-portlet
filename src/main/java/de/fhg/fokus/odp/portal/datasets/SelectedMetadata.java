@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -67,6 +68,7 @@ import de.fhg.fokus.odp.registry.model.Application;
 import de.fhg.fokus.odp.registry.model.Contact;
 import de.fhg.fokus.odp.registry.model.Metadata;
 import de.fhg.fokus.odp.registry.model.Resource;
+import de.fhg.fokus.odp.registry.model.Tag;
 import de.fhg.fokus.odp.registry.model.exception.OpenDataRegistryException;
 
 // TODO: Auto-generated Javadoc
@@ -120,14 +122,18 @@ public class SelectedMetadata implements Serializable {
 	 */
 	private int actualRating = 0;
 
+	private String keywords = "";
+
 	/**
 	 * gets the rssUrl.
 	 * 
 	 * @return te rssUrl
 	 */
 	public String getRssUrl() {
-		ThemeDisplay themeDisplay = LiferayFacesContext.getInstance().getThemeDisplay();
-		rssUrl = themeDisplay.getURLPortal() + "/rss-servlet/webresources/rssservice?";
+		ThemeDisplay themeDisplay = LiferayFacesContext.getInstance()
+				.getThemeDisplay();
+		rssUrl = themeDisplay.getURLPortal()
+				+ "/rss-servlet/webresources/rssservice?";
 		rssUrl += "name=" + metadata.getName();
 		return rssUrl;
 	}
@@ -150,10 +156,13 @@ public class SelectedMetadata implements Serializable {
 	public void init() {
 
 		if (metadata == null) {
-			String name = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("metadata");
+			String name = FacesContext.getCurrentInstance()
+					.getExternalContext().getRequestParameterMap()
+					.get("metadata");
 			if (name != null) {
 				try {
-					metadata = registryClient.getInstance().getMetadata(null, name);
+					metadata = registryClient.getInstance().getMetadata(null,
+							name);
 					// registryClient.getInstance().loadRating(metadata);
 				} catch (OpenDataRegistryException e) {
 					logger.error("Metadata detail page", e.getMessage());
@@ -162,11 +171,14 @@ public class SelectedMetadata implements Serializable {
 		}
 
 		if (metadata != null) {
-			LiferayFacesContext.getInstance().getThemeDisplay().getLayout().setTitle(metadata.getTitle());
+			LiferayFacesContext.getInstance().getThemeDisplay().getLayout()
+					.setTitle(metadata.getTitle());
 			try {
-				comments = MetadataCommentLocalServiceUtil.findBymetadataName(metadata.getName());
+				comments = MetadataCommentLocalServiceUtil
+						.findBymetadataName(metadata.getName());
 			} catch (SystemException e) {
-				logger.error("Loading comments of metadata " + metadata.getName(), e);
+				logger.error(
+						"Loading comments of metadata " + metadata.getName(), e);
 			}
 		}
 	}
@@ -179,34 +191,47 @@ public class SelectedMetadata implements Serializable {
 	 * @throws SystemException
 	 * @throws PortalException
 	 */
-	private void sendMail() throws MessagingException, PortalException, SystemException {
+	private void sendMail() throws MessagingException, PortalException,
+			SystemException {
 
 		// get some global objects
 		LiferayFacesContext lfc = LiferayFacesContext.getInstance();
 		ThemeDisplay tD = lfc.getThemeDisplay();
-		PortletRequest request = (PortletRequest) lfc.getExternalContext().getRequest();
+		PortletRequest request = (PortletRequest) lfc.getExternalContext()
+				.getRequest();
 
-		String metadataUrl = LiferayFacesContext.getInstance().getThemeDisplay().getLayout().getFriendlyURL();
+		String metadataUrl = LiferayFacesContext.getInstance()
+				.getThemeDisplay().getLayout().getFriendlyURL();
 		metadataUrl += "/-/details/" + metadata.getName();
 
 		// get the email subject and body
-		String subject = LanguageUtil.get(request.getLocale(), "od.datasets.comment.email.subject") + " "
+		String subject = LanguageUtil.get(request.getLocale(),
+				"od.datasets.comment.email.subject")
+				+ " "
 				+ metadata.getType().getDisplayName();
-		String body = LanguageUtil.get(request.getLocale(), "od.datasets.comment.email.body.comment") + "\t" + newComment;
+		String body = LanguageUtil.get(request.getLocale(),
+				"od.datasets.comment.email.body.comment") + "\t" + newComment;
 
-		body += "\n\n" + LanguageUtil.get(request.getLocale(), "od.datasets.comment.email.body.metadata") + "\t" + metadata.getTitle()
-				+ "\n\t" + metadata.getName() + "\n\t" + portalUrl(metadataUrl);
+		body += "\n\n"
+				+ LanguageUtil.get(request.getLocale(),
+						"od.datasets.comment.email.body.metadata") + "\t"
+				+ metadata.getTitle() + "\n\t" + metadata.getName() + "\n\t"
+				+ portalUrl(metadataUrl);
 
-		body += "\n\n" + LanguageUtil.get(request.getLocale(), "od.datasets.comment.email.body.user") + "\t"
+		body += "\n\n"
+				+ LanguageUtil.get(request.getLocale(),
+						"od.datasets.comment.email.body.user") + "\t"
 				+ UserLocalServiceUtil.getUser(tD.getUserId()).getLogin();
 
 		// get the from address
-		String fromStr = PortalUtil.getPortalProperties().getProperty("admin.email.from.address");
+		String fromStr = PortalUtil.getPortalProperties().getProperty(
+				"admin.email.from.address");
 		if (fromStr == null || fromStr.matches("^\\s*$")) {
 			try {
-				fromStr = PrefsPropsUtil.getString(tD.getCompanyId(), "admin.email.from.address");
+				fromStr = PrefsPropsUtil.getString(tD.getCompanyId(),
+						"admin.email.from.address");
 			} catch (SystemException e) {
-				logger.error(e.getMessage());
+				logger.error("sendMail:SystemException:" + e.getMessage());
 				return;
 			}
 		}
@@ -243,7 +268,8 @@ public class SelectedMetadata implements Serializable {
 		for (int i = 0; i < cLs.size(); i++) {
 			try {
 				logger.debug(cLs.get(i).getEmail());
-				msg.addRecipient(Message.RecipientType.TO, new InternetAddress(cLs.get(i).getEmail()));
+				msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
+						cLs.get(i).getEmail()));
 			} catch (AddressException e) {
 				logger.warn(e.getMessage() + ": " + cLs.get(i).getEmail());
 			} catch (Exception e) {
@@ -252,7 +278,8 @@ public class SelectedMetadata implements Serializable {
 		}
 
 		// add BCC for observing comments
-		msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(PropsUtil.get("mail.comment.cc.address")));
+		msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(
+				PropsUtil.get("mail.comment.cc.address")));
 
 		msg.setContent(body, "text/plain");
 		msg.setFrom(from);
@@ -275,8 +302,9 @@ public class SelectedMetadata implements Serializable {
 		if (!newComment.isEmpty()) {
 
 			try {
-				MetadataComment comment = MetadataCommentLocalServiceUtil.createMetadataComment(CounterLocalServiceUtil
-						.increment(MetadataComment.class.getName()));
+				MetadataComment comment = MetadataCommentLocalServiceUtil
+						.createMetadataComment(CounterLocalServiceUtil
+								.increment(MetadataComment.class.getName()));
 
 				comment.setText(newComment);
 				comment.setUserLiferayId(tD.getUserId());
@@ -285,7 +313,8 @@ public class SelectedMetadata implements Serializable {
 
 				MetadataCommentLocalServiceUtil.addMetadataComment(comment);
 
-				comments = MetadataCommentLocalServiceUtil.findBymetadataName(metadata.getName());
+				comments = MetadataCommentLocalServiceUtil
+						.findBymetadataName(metadata.getName());
 				feedback.setMetadataCommentCreated(true);
 				sendMail();
 
@@ -311,8 +340,10 @@ public class SelectedMetadata implements Serializable {
 	 * @throws SystemException
 	 *             the system exception
 	 */
-	public String getCommentAuthor(MetadataComment comment) throws PortalException, SystemException {
-		return UserLocalServiceUtil.getUser(comment.getUserLiferayId()).getScreenName();
+	public String getCommentAuthor(MetadataComment comment)
+			throws PortalException, SystemException {
+		return UserLocalServiceUtil.getUser(comment.getUserLiferayId())
+				.getScreenName();
 	}
 
 	/**
@@ -326,7 +357,8 @@ public class SelectedMetadata implements Serializable {
 	 * @throws SystemException
 	 *             the system exception
 	 */
-	public String removeComment(MetadataComment comment) throws PortalException, SystemException {
+	public String removeComment(MetadataComment comment)
+			throws PortalException, SystemException {
 		MetadataCommentLocalServiceUtil.deleteMetadataComment(comment.get_id());
 		return show();
 	}
@@ -431,7 +463,8 @@ public class SelectedMetadata implements Serializable {
 	 * @return the string
 	 */
 	public String show() {
-		String location = LiferayFacesContext.getInstance().getThemeDisplay().getLayout().getFriendlyURL();
+		String location = LiferayFacesContext.getInstance().getThemeDisplay()
+				.getLayout().getFriendlyURL();
 		location += "/-/details/" + metadata.getName();
 		link(location);
 		return "";
@@ -447,7 +480,9 @@ public class SelectedMetadata implements Serializable {
 		Object responseObject = facesContext.getExternalContext().getResponse();
 		if (responseObject != null && responseObject instanceof ActionResponse) {
 			ActionResponse actionResponse = (ActionResponse) responseObject;
-			actionResponse.setEvent(new QName("http://fokus.fraunhofer.de/odplatform", "metadata"), metadata);
+			actionResponse.setEvent(new QName(
+					"http://fokus.fraunhofer.de/odplatform", "metadata"),
+					metadata);
 		}
 
 		link("/bearbeiten");
@@ -455,7 +490,8 @@ public class SelectedMetadata implements Serializable {
 	}
 
 	private String portalUrl(String page) {
-		ThemeDisplay themeDisplay = LiferayFacesContext.getInstance().getThemeDisplay();
+		ThemeDisplay themeDisplay = LiferayFacesContext.getInstance()
+				.getThemeDisplay();
 		String location = themeDisplay.getPortalURL();
 
 		Layout layout = themeDisplay.getLayout();
@@ -490,7 +526,8 @@ public class SelectedMetadata implements Serializable {
 		String location = portalUrl(page);
 
 		try {
-			FacesContext.getCurrentInstance().getExternalContext().redirect(location);
+			FacesContext.getCurrentInstance().getExternalContext()
+					.redirect(location);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -564,11 +601,16 @@ public class SelectedMetadata implements Serializable {
 	/**
 	 * Rate.
 	 * 
-	 * @see http ://docs.ckan.org/en/latest/apiv3.html?highlight=rating#ckan.logic .action.create.rating_create
+	 * @see http 
+	 *      ://docs.ckan.org/en/latest/apiv3.html?highlight=rating#ckan.logic
+	 *      .action.create.rating_create
 	 */
 	public void rate() {
-		logger.debug("setRating() -> " + actualRating + " - " + currentUser.getUser().getDisplayName() + " - " + metadata.getName());
-		registryClient.getInstance().rateMetadata(currentUser.getUser(), metadata.getName(), actualRating);
+		logger.debug("setRating() -> " + actualRating + " - "
+				+ currentUser.getUser().getDisplayName() + " - "
+				+ metadata.getName());
+		registryClient.getInstance().rateMetadata(currentUser.getUser(),
+				metadata.getName(), actualRating);
 	}
 
 	/**
@@ -614,6 +656,23 @@ public class SelectedMetadata implements Serializable {
 	 * @return The URL to CKAN API of this metadata
 	 */
 	public String getMetadataCKANUrl() {
-		return PropsUtil.get("cKANurlFriendly") + "api/rest/dataset/" + metadata.getName();
+		return PropsUtil.get("cKANurlFriendly") + "api/rest/dataset/"
+				+ metadata.getName();
+	}
+
+	public String getKeywords() {
+		String keywordsString = "";
+		List<Tag> tags = metadata.getTags();
+		for (Iterator<Tag> iterator = tags.iterator(); iterator.hasNext();) {
+			Tag tag = (Tag) iterator.next();
+			keywordsString = keywordsString + tag.getName();
+			keywordsString = keywordsString + ", ";
+		}
+		setKeywords(keywordsString);
+		return this.keywords;
+	}
+
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
 	}
 }

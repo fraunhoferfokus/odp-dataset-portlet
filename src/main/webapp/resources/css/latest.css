@@ -59,11 +59,3 @@ img.smallCommentsAndRatings {
 .dataset-commentsandratings-value {
 	color:rgb(119,178,56);
 }
-.lineDivider {
-	border-style: dashed;
-	border-width: 1px;
-	height: 1px;
-	width: 90%;
-	color: #000000;
-	background-color: transparent;
-}

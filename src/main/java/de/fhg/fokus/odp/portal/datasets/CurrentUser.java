@@ -24,6 +24,9 @@ package de.fhg.fokus.odp.portal.datasets;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.annotation.Documented;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +40,9 @@ import javax.portlet.ActionResponse;
 import javax.portlet.PortletRequest;
 import javax.xml.namespace.QName;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.liferay.faces.portal.context.LiferayFacesContext;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -48,6 +54,7 @@ import com.liferay.portal.theme.ThemeDisplay;
 import de.fhg.fokus.odp.registry.model.Metadata;
 import de.fhg.fokus.odp.registry.model.MetadataEnumType;
 import de.fhg.fokus.odp.registry.model.User;
+import de.fhg.fokus.odp.registry.model.exception.OpenDataRegistryException;
 
 /**
  * The Class CurrentUser.
@@ -58,213 +65,246 @@ import de.fhg.fokus.odp.registry.model.User;
 @ViewScoped
 public class CurrentUser implements Serializable {
 
-    /**
+	/**
 	 * 
 	 */
-    private static final long serialVersionUID = -3271983798009799515L;
+	private static final long serialVersionUID = -3271983798009799515L;
+	private static final Logger log = LoggerFactory
+			.getLogger(CurrentUser.class);
 
-    /** The user. */
-    private User user;
+	/** The user. */
+	private User user;
 
-    /** The registry client. */
-    @ManagedProperty("#{registryClient}")
-    private RegistryClient registryClient;
+	/** The registry client. */
+	@ManagedProperty("#{registryClient}")
+	private RegistryClient registryClient;
 
-    /** The creator. */
-    private Boolean creator;
+	/** The creator. */
+	private Boolean creator;
 
-    /** The new metadata button value. */
-    private String newMetadataButtonValue;
+	/** The new metadata button value. */
+	private String newMetadataButtonValue;
 
-    /**
-     * Sets the registry client.
-     * 
-     * @param registryClient
-     *            the new registry client
-     */
-    public void setRegistryClient(RegistryClient registryClient) {
-        this.registryClient = registryClient;
-    }
+	/**
+	 * Sets the registry client.
+	 * 
+	 * @param registryClient
+	 *            the new registry client
+	 */
+	public void setRegistryClient(RegistryClient registryClient) {
+		this.registryClient = registryClient;
+	}
 
-    /**
-     * Inits the.
-     */
-    @PostConstruct
-    public void init() {
-        PortletRequest request = (PortletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        @SuppressWarnings("unchecked")
-        Map<String, String> userInfo = (Map<String, String>) request.getAttribute(PortletRequest.USER_INFO);
-        if (userInfo != null) {
-            String loginid = userInfo.get("user.login.id");
-            if (loginid != null) {
-                user = registryClient.getInstance().findUser(loginid.toLowerCase());
-                if (user == null) {
-                    user = registryClient.getInstance().createUser(loginid.toLowerCase(), "dummy@test.org", "dummy");
-                }
-            }
-        }
-    }
+	/**
+	 * Inits the.
+	 */
+	@PostConstruct
+	public void init() {
+		PortletRequest request = (PortletRequest) FacesContext
+				.getCurrentInstance().getExternalContext().getRequest();
+		@SuppressWarnings("unchecked")
+		Map<String, String> userInfo = (Map<String, String>) request
+				.getAttribute(PortletRequest.USER_INFO);
+		if (userInfo != null) {
+			String loginid = userInfo.get("user.login.id");
+			if (loginid != null) {
+				user = registryClient.getInstance().findUser(
+						loginid.toLowerCase());
+				if (user == null) {
+					user = registryClient.getInstance().createUser(
+							loginid.toLowerCase(), "dummy@test.org", "dummy");
+				}
+			}
+		}
+	}
 
-    /**
-     * Gets the user.
-     * 
-     * @return the user
-     */
-    public User getUser() {
-        return user;
-    }
+	/**
+	 * Gets the user.
+	 * 
+	 * @return the user
+	 */
+	public User getUser() {
+		return user;
+	}
 
-    /**
-     * Checks if is redakteur.
-     * 
-     * @return true, if is redakteur
-     * @throws SystemException
-     *             the system exception
-     */
-    public boolean isRedakteur() throws SystemException {
-        boolean result = false;
-        ThemeDisplay themeDisplay = LiferayFacesContext.getInstance().getThemeDisplay();
-        com.liferay.portal.model.User user = themeDisplay.getUser();
+	/**
+	 * Checks if is redakteur.
+	 * 
+	 * @return true, if is redakteur
+	 * @throws SystemException
+	 *             the system exception
+	 */
+	public boolean isRedakteur() throws SystemException {
+		boolean result = false;
+		ThemeDisplay themeDisplay = LiferayFacesContext.getInstance()
+				.getThemeDisplay();
+		com.liferay.portal.model.User user = themeDisplay.getUser();
 
-        List<Role> roles = RoleLocalServiceUtil.getUserRoles(user.getUserId());
+		List<Role> roles = RoleLocalServiceUtil.getUserRoles(user.getUserId());
 
-        String name;
-        for (int i = 0; i < roles.size(); ++i) {
-            name = roles.get(i).getName();
-            if (name.equals("Redakteur")) {
-                result = true;
-            }
-        }
+		String name;
+		for (int i = 0; i < roles.size(); ++i) {
+			name = roles.get(i).getName();
+			if (name.equals("Redakteur")) {
+				result = true;
+			}
+		}
+		return result;
+	}
 
-        return result;
-    }
+	/**
+	 * Checks if is loggedin.
+	 * 
+	 * @return true, if is loggedin
+	 */
+	public boolean isLoggedin() {
+		return user != null;
+	}
 
-    /**
-     * Checks if is loggedin.
-     * 
-     * @return true, if is loggedin
-     */
-    public boolean isLoggedin() {
-        return user != null;
-    }
+	/**
+	 * Checks if is owner.
+	 * 
+	 * @param metadata
+	 *            the metadata
+	 * @return true, if is owner
+	 */
+	public boolean isOwner(Metadata metadata) {
+		boolean result = false;
 
-    /**
-     * Checks if is owner.
-     * 
-     * @param metadata
-     *            the metadata
-     * @return true, if is owner
-     */
-    public boolean isOwner(Metadata metadata) {
-        boolean result = false;
+		if (user != null && metadata != null) {
+			result = user.isOwner(metadata);
+		}
 
-        if (user != null) {
-            result = user.isOwner(metadata);
-        }
+		return result;
+	}
 
-        return result;
-    }
+	/**
+	 * Checks if is editor.
+	 * 
+	 * @param metadata
+	 *            the metadata
+	 * @return true, if is editor
+	 */
+	public boolean isEditor(Metadata metadata) {
+		if (metadata == null) {
+			return false;
+		}
+		return user != null ? user.isEditor(metadata) : false;
+	}
 
-    /**
-     * Checks if is editor.
-     * 
-     * @param metadata
-     *            the metadata
-     * @return true, if is editor
-     */
-    public boolean isEditor(Metadata metadata) {
-        if (metadata == null) {
-            return false;
-        }
-        return user != null ? user.isEditor(metadata) : false;
-    }
+	/**
+	 * Checks if is creator.
+	 * 
+	 * @return true, if is creator
+	 */
+	public boolean isCreator() {
+		if (user != null && creator == null) {
+			if (user.hasRole("editor")) {
+				creator = Boolean.TRUE;
+			} else {
+				creator = Boolean.FALSE;
+			}
+		}
+		return creator != null ? creator : false;
+	}
 
-    /**
-     * Checks if is creator.
-     * 
-     * @return true, if is creator
-     */
-    public boolean isCreator() {
-        if (user != null && creator == null) {
-            if (user.hasRole("editor")) {
-                creator = Boolean.TRUE;
-            } else {
-                creator = Boolean.FALSE;
-            }
-        }
-        return creator != null ? creator : false;
-    }
+	/**
+	 * New metadata.
+	 * 
+	 * @param actionEvent
+	 *            the action event
+	 */
+	public void newMetadata(ActionEvent actionEvent) {
+		Metadata metadata;
 
-    /**
-     * New metadata.
-     * 
-     * @param actionEvent
-     *            the action event
-     */
-    public void newMetadata(ActionEvent actionEvent) {
-        Metadata metadata;
+		ThemeDisplay themeDisplay = LiferayFacesContext.getInstance()
+				.getThemeDisplay();
+		String currentPage = themeDisplay.getLayout().getFriendlyURL();
+		if (currentPage.equals("/daten")) {
+			metadata = registryClient.getInstance().createMetadata(
+					MetadataEnumType.DATASET);
+		} else if (currentPage.equals("/apps")) {
+			metadata = registryClient.getInstance().createMetadata(
+					MetadataEnumType.APPLICATION);
+		} else {
+			metadata = registryClient.getInstance().createMetadata(
+					MetadataEnumType.DOCUMENT);
+		}
 
-        ThemeDisplay themeDisplay = LiferayFacesContext.getInstance().getThemeDisplay();
-        String currentPage = themeDisplay.getLayout().getFriendlyURL();
-        if (currentPage.equals("/daten")) {
-            metadata = registryClient.getInstance().createMetadata(MetadataEnumType.DATASET);
-        } else if (currentPage.equals("/apps")) {
-            metadata = registryClient.getInstance().createMetadata(MetadataEnumType.APPLICATION);
-        } else {
-            metadata = registryClient.getInstance().createMetadata(MetadataEnumType.DOCUMENT);
-        }
+		FacesContext facesContext = FacesContext.getCurrentInstance();
+		Object responseObject = facesContext.getExternalContext().getResponse();
+		if (responseObject != null && responseObject instanceof ActionResponse) {
+			ActionResponse actionResponse = (ActionResponse) responseObject;
+			actionResponse.setEvent(new QName(
+					"http://fokus.fraunhofer.de/odplatform", "metadata"),
+					metadata);
+		}
 
-        FacesContext facesContext = FacesContext.getCurrentInstance();
-        Object responseObject = facesContext.getExternalContext().getResponse();
-        if (responseObject != null && responseObject instanceof ActionResponse) {
-            ActionResponse actionResponse = (ActionResponse) responseObject;
-            actionResponse.setEvent(new QName("http://fokus.fraunhofer.de/odplatform", "metadata"), metadata);
-        }
+		String location = themeDisplay.getPortalURL();
 
-        String location = themeDisplay.getPortalURL();
+		Layout layout = themeDisplay.getLayout();
+		try {
+			if (layout.isPublicLayout()) {
+				location += themeDisplay.getPathFriendlyURLPublic();
+			}
+			if (layout.hasScopeGroup()) {
+				location += layout.getScopeGroup().getFriendlyURL();
+			} else {
+				location += layout.getGroup().getFriendlyURL();
+			}
 
-        Layout layout = themeDisplay.getLayout();
-        try {
-            if (layout.isPublicLayout()) {
-                location += themeDisplay.getPathFriendlyURLPublic();
-            }
-            if (layout.hasScopeGroup()) {
-                location += layout.getScopeGroup().getFriendlyURL();
-            } else {
-                location += layout.getGroup().getFriendlyURL();
-            }
+			location += "/bearbeiten";
+		} catch (PortalException e) {
+			e.printStackTrace();
+		} catch (SystemException e) {
+			e.printStackTrace();
+		}
 
-            location += "/bearbeiten";
-        } catch (PortalException e) {
-            e.printStackTrace();
-        } catch (SystemException e) {
-            e.printStackTrace();
-        }
+		try {
+			facesContext.getExternalContext().redirect(location);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-        try {
-            facesContext.getExternalContext().redirect(location);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	/**
+	 * Gets the new metadata button value.
+	 * 
+	 * @return the new metadata button value
+	 */
+	public String getNewMetadataButtonValue() {
+		return newMetadataButtonValue;
+	}
 
-    /**
-     * Gets the new metadata button value.
-     * 
-     * @return the new metadata button value
-     */
-    public String getNewMetadataButtonValue() {
-        return newMetadataButtonValue;
-    }
+	/**
+	 * Sets the new metadata button value.
+	 * 
+	 * @param newMetadataButtonValue
+	 *            the new new metadata button value
+	 */
+	public void setNewMetadataButtonValue(String newMetadataButtonValue) {
+		this.newMetadataButtonValue = newMetadataButtonValue;
+	}
 
-    /**
-     * Sets the new metadata button value.
-     * 
-     * @param newMetadataButtonValue
-     *            the new new metadata button value
-     */
-    public void setNewMetadataButtonValue(String newMetadataButtonValue) {
-        this.newMetadataButtonValue = newMetadataButtonValue;
-    }
+	/**
+	 * Gets and build the metadatas list for user.
+	 * 
+	 * @return the metadatas list
+	 */
+	public List<Metadata> getMetadatas() {
+
+		List<Metadata> metadatas = new ArrayList<Metadata>();
+		List<String> datasets = user.getDatasets();
+		for (String dataset : datasets) {
+			try {
+				Metadata metadata = registryClient.getInstance().getMetadata(
+						user, dataset);
+				metadatas.add(metadata);
+			} catch (OpenDataRegistryException e) {
+				e.printStackTrace();
+			}
+		}
+		return metadatas;
+	}
 
 }

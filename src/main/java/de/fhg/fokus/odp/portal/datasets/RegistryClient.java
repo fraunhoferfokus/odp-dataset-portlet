@@ -53,6 +53,7 @@ public class RegistryClient implements Serializable {
 
     private static final String PROP_NAME_AUTHORIZATION_KEY = "authenticationKey";
     private static final String PROP_NAME_CKAN_URL = "cKANurl";
+    private static final String PROP_NAME_DEFAULT_SORT_METADATA = "sorting.default.metadata";
 
     private ODRClient client;
 
@@ -67,6 +68,7 @@ public class RegistryClient implements Serializable {
         Properties props = new Properties();
         props.setProperty("ckan.authorization.key", PropsUtil.get(PROP_NAME_AUTHORIZATION_KEY));
         props.setProperty("ckan.url", PropsUtil.get(PROP_NAME_CKAN_URL));
+        props.setProperty("sorting.default.metadata", PropsUtil.get(PROP_NAME_DEFAULT_SORT_METADATA));
         client.init(props);
     }
 
